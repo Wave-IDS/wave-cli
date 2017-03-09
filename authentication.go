@@ -1,9 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -18,8 +18,17 @@ var password string
 
 func parse_envars() {
 	endpoint = os.Getenv("WAVE_HOST")
+	if endpoint == "" {
+		log.Fatal("WAVE_HOST must be set")
+	}
 	username = os.Getenv("WAVE_USER")
+	if username == "" {
+		log.Fatal("WAVE_USER must be set")
+	}
 	password = os.Getenv("WAVE_PASSWORD")
+	if password == "" {
+		log.Fatal("WAVE_PASSWORD must be set")
+	}
 }
 
 func login() {
@@ -51,8 +60,32 @@ func login() {
 	}
 }
 
-func request(req *http.Request) (params map[string]string) {
-	cookie := http.Cookie{
+func logout() {
+	req, err := http.NewRequest(
+		"POST",
+		endpoint+"/sessions/delete",
+		strings.NewReader(fmt.Sprintf("")),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	request(req)
+}
+
+func request(req *http.Request) io.ReadCloser {
+	cookie := new_cookie()
+	req.AddCookie(&cookie)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Error(err)
+		return nil
+	}
+	return resp.Body
+}
+
+func new_cookie() http.Cookie {
+	return http.Cookie{
 		Name:     "wave_session",
 		Value:    session_id,
 		Path:     "/",
@@ -60,21 +93,5 @@ func request(req *http.Request) (params map[string]string) {
 		MaxAge:   int(time.Now().AddDate(1, 0, 1).Unix()),
 		Secure:   false,
 		HttpOnly: true,
-		Raw:      "wave_session=" + session_id,
-		Unparsed: []string{"wave_session=" + session_id},
 	}
-	req.AddCookie(&cookie)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&params)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	return
 }
