@@ -21,7 +21,7 @@ Available commands:
                 users
                 tls
         update
-                userpassword <password>
+                password <old> <new>
                 assignpassword <username> <password>
                 username <name>
                 tls <cert file> <key file>
