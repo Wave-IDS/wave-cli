@@ -70,9 +70,9 @@ func main() {
 				continue
 			}
 			switch parts[1] {
-			case "userpassword":
+			case "password":
 				if len(parts) < 4 {
-					log.Error("not enough arguments provided to 'update userpassword'")
+					log.Error("not enough arguments provided to 'update password'")
 					continue
 				}
 				updateUserPassword(parts[2], parts[3])
@@ -124,7 +124,7 @@ func main() {
 				continue
 			}
 			switch parts[1] {
-			case "visualization":
+			case "visualizer":
 				streamVisualEvents()
 			default:
 				fmt.Println("unknown argument to 'visualize'")
@@ -151,7 +151,7 @@ func printHelp() {
 	fmt.Println("\t\tusers")
 	fmt.Println("\t\ttls")
 	fmt.Println("\tupdate")
-	fmt.Println("\t\tuserpassword <password>")
+	fmt.Println("\t\tpassword <old> <new>")
 	fmt.Println("\t\tassignpassword <username> <password>")
 	fmt.Println("\t\tusername <name>")
 	fmt.Println("\t\ttls <cert file> <key file>")
