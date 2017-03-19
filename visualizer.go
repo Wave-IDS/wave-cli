@@ -7,16 +7,25 @@ import (
 	"golang.org/x/net/websocket"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 func streamVisualEvents() {
-	ws_endpoint, err := url.Parse("ws://127.0.0.1:8080/streams/visualizer") // parse or set
+	endpoint_str := ""
+	host := os.Getenv("WAVE_HOST")
+	if len(host) >= 5 && host[:5] == "https" {
+		endpoint_str = "wss" + host[5:]
+	} else {
+		endpoint_str = "ws" + host[4:]
+	}
+	ws_endpoint, err := url.Parse(endpoint_str + "/streams/visualizer")
 	if err != nil {
 		log.WithFields(log.Fields{
-			"error": err.Error(),
+			"endpoint_str": endpoint_str,
+			"error":        err.Error(),
 		}).Fatal("unable to parse wave uri")
 	}
-	ws_origin, err := url.Parse("https://127.0.0.1:8080/streams/visualizer")
+	ws_origin, err := url.Parse(host + "/streams/visualizer")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err.Error(),
